@@ -1,0 +1,15 @@
+airing:
+  name: Aérer
+  description: Entrouvre le volet en position d'aération.
+  target:
+    entity:
+      domain: cover
+      integration: rollershutter_api
+
+intermediate_position:
+  name: Position intermédiaire
+  description: Place le volet en position intermédiaire prédéfinie.
+  target:
+    entity:
+      domain: cover
+      integration: rollershutter_api
