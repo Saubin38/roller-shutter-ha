@@ -23,30 +23,27 @@ redémarre Home Assistant.
 
 ## Configuration
 
-Tout se fait dans `configuration.yaml`, sous la clé `cover` :
+Depuis Home Assistant : **Paramètres → Appareils et services → + Ajouter une intégration**,
+recherche **"Roller Shutter API"**, puis renseigne :
 
-```yaml
-cover:
-  - platform: rollershutter_api
-    host: 192.168.1.50
-    port: 8080
-    api_key: "TA_CLE_API_ICI"
-    ssl: false
-    scan_interval: 30
-```
-
-| Paramètre       | Obligatoire | Défaut               | Description                                             |
+| Champ           | Obligatoire | Défaut               | Description                                             |
 |-----------------|:-----------:|-----------------------|------------------------------------------------------------|
-| `host`          | oui         | —                      | IP ou nom d'hôte du serveur exposant l'API                 |
-| `api_key`       | oui         | —                      | Clé API envoyée dans le header `X-API-KEY`                 |
-| `port`          | non         | `8080`                 | Port du serveur                                             |
-| `ssl`           | non         | `false`                | `true` pour interroger l'API en HTTPS                       |
-| `api_path`      | non         | `/api/rhollershutter`  | Chemin de base de l'API (si tu le changes côté Spring)      |
-| `scan_interval` | non         | `30`                   | Fréquence (secondes) de rafraîchissement de l'état          |
+| Hôte            | oui         | —                      | IP ou nom d'hôte du serveur exposant l'API                 |
+| Clé API         | oui         | —                      | Clé envoyée dans le header `X-API-KEY`                     |
+| Port            | non         | `8080`                 | Port du serveur                                             |
+| Utiliser HTTPS  | non         | `false`                | Coche si l'API est en HTTPS                                 |
+| Chemin de l'API | non         | `/api/rhollershutter`  | Chemin de base de l'API (si tu le changes côté Spring)      |
 
-Après redémarrage, un `cover.<nom>` est créé automatiquement pour
+La connexion est testée immédiatement lors de l'ajout : si l'hôte est injoignable
+ou la clé API invalide, un message d'erreur s'affiche directement dans le formulaire.
+
+Après validation, un `cover.<nom>` est créé automatiquement pour
 **chaque volet renvoyé par `GET /all`** — pas de déclaration manuelle
-volet par volet.
+volet par volet, et les nouveaux volets ajoutés côté API apparaissent
+automatiquement au fil des rafraîchissements.
+
+Pour ajuster la fréquence de rafraîchissement après coup : sur la carte de
+l'intégration, clique sur **Configurer** (icône ⚙️).
 
 ## Fonctionnement
 

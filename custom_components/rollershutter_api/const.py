@@ -1,6 +1,8 @@
 """Constantes pour l'intégration Roller Shutter API."""
+from homeassistant.const import Platform
 
 DOMAIN = "rollershutter_api"
+PLATFORMS = [Platform.COVER]
 
 # Config
 CONF_API_KEY = "api_key"

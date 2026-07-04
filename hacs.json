@@ -1,9 +1,6 @@
 {
   "name": "Roller Shutter API",
-  "hide_default_branch": true,
   "content_in_root": false,
-  "homeassistant": "2023.9.0",
-  "country": [
-        "FR"
-    ]
+  "render_readme": true,
+  "homeassistant": "2023.1.0"
 }

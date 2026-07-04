@@ -1,0 +1,34 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Roller Shutter API",
+        "description": "Enter the connection details for your server.",
+        "data": {
+          "host": "Host (IP or hostname)",
+          "port": "Port",
+          "api_key": "API key",
+          "ssl": "Use HTTPS",
+          "api_path": "API base path"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect. Check the host, port, and that the server is reachable.",
+      "invalid_auth": "Invalid API key."
+    },
+    "abort": {
+      "already_configured": "This server is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options",
+        "data": {
+          "scan_interval": "Refresh interval (seconds)"
+        }
+      }
+    }
+  }
+}

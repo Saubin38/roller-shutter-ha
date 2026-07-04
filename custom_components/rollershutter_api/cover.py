@@ -1,111 +1,55 @@
 """Plateforme cover pour l'intégration Roller Shutter API."""
 from __future__ import annotations
 
-from datetime import timedelta
 import logging
 from typing import Any
 
-import voluptuous as vol
-
 from homeassistant.components.cover import (
     ATTR_POSITION,
-    PLATFORM_SCHEMA,
     CoverDeviceClass,
     CoverEntity,
     CoverEntityFeature,
 )
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_SCAN_INTERVAL
-from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.helpers import config_validation as cv, entity_platform
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-    DataUpdateCoordinator,
-    UpdateFailed,
-)
+from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
 
-from .api import RollerShutterApiClient, RollerShutterApiError
-from .const import (
-    CONF_API_KEY,
-    CONF_API_PATH,
-    CONF_SSL,
-    DEFAULT_API_PATH,
-    DEFAULT_PORT,
-    DEFAULT_SCAN_INTERVAL,
-    DEFAULT_SSL,
-    DOMAIN,
-)
+from .api import RollerShutterApiClient
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 SERVICE_AIRING = "airing"
 SERVICE_INTERMEDIATE_POSITION = "intermediate_position"
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_HOST): cv.string,
-        vol.Required(CONF_API_KEY): cv.string,
-        vol.Optional(CONF_PORT, default=DEFAULT_PORT): cv.port,
-        vol.Optional(CONF_SSL, default=DEFAULT_SSL): cv.boolean,
-        vol.Optional(CONF_API_PATH, default=DEFAULT_API_PATH): cv.string,
-        vol.Optional(
-            CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL
-        ): cv.positive_int,
-    }
-)
 
-
-async def async_setup_platform(
+async def async_setup_entry(
     hass: HomeAssistant,
-    config: ConfigType,
+    entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
-    """Initialise la plateforme cover à partir de configuration.yaml."""
+    """Crée les entités cover à partir du coordinator déjà initialisé."""
 
-    session = async_get_clientsession(hass)
-    client = RollerShutterApiClient(
-        session=session,
-        host=config[CONF_HOST],
-        port=config[CONF_PORT],
-        api_key=config[CONF_API_KEY],
-        ssl=config[CONF_SSL],
-        api_path=config[CONF_API_PATH],
-    )
+    data = hass.data[DOMAIN][entry.entry_id]
+    coordinator: DataUpdateCoordinator = data["coordinator"]
+    client: RollerShutterApiClient = data["client"]
 
-    async def _async_update_data() -> dict[str, dict[str, Any]]:
-        try:
-            shutters = await client.async_get_all()
-        except RollerShutterApiError as err:
-            raise UpdateFailed(f"Erreur lors de la mise à jour: {err}") from err
-        # Indexé par nom pour un accès rapide depuis chaque entité
-        return {shutter["name"]: shutter for shutter in shutters}
+    known_names: set[str] = set()
 
-    coordinator = DataUpdateCoordinator(
-        hass,
-        _LOGGER,
-        name=DOMAIN,
-        update_method=_async_update_data,
-        update_interval=timedelta(seconds=config[CONF_SCAN_INTERVAL]),
-    )
-
-    # Plateforme configurée via YAML (pas de config entry) : on force
-    # simplement un premier rafraîchissement des données.
-    await coordinator.async_refresh()
-
-    if coordinator.data is None:
-        _LOGGER.warning(
-            "Aucune donnée reçue de l'API à l'initialisation, "
-            "les volets apparaîtront dès que l'API répondra."
+    def _add_new_entities() -> None:
+        new_names = set(coordinator.data or {}) - known_names
+        if not new_names:
+            return
+        known_names.update(new_names)
+        async_add_entities(
+            RollerShutterCoverEntity(coordinator, client, name, entry.entry_id)
+            for name in new_names
         )
 
-    entities = [
-        RollerShutterCoverEntity(coordinator, client, name)
-        for name in (coordinator.data or {})
-    ]
-    async_add_entities(entities)
+    _add_new_entities()
+    entry.async_on_unload(coordinator.async_add_listener(_add_new_entities))
 
     # Services personnalisés : airing (aération) et position intermédiaire.
     platform = entity_platform.async_get_current_platform()
@@ -132,11 +76,12 @@ class RollerShutterCoverEntity(CoordinatorEntity, CoverEntity):
         coordinator: DataUpdateCoordinator,
         client: RollerShutterApiClient,
         name: str,
+        entry_id: str,
     ) -> None:
         super().__init__(coordinator)
         self._client = client
         self._shutter_name = name
-        self._attr_unique_id = f"{DOMAIN}_{name}"
+        self._attr_unique_id = f"{entry_id}_{name}"
         self._attr_name = name
 
     @property
