@@ -48,8 +48,9 @@ l'intégration, clique sur **Configurer** (icône ⚙️).
 ## Fonctionnement
 
 - **Ouvrir / Fermer / Stop** → mappés sur `open`, `close`, `stop`.
-- **Curseur de position (0–100 %)** → mappé sur `closePercent`, avec
-  conversion automatique (HA : `100 = ouvert` ↔ API : `100 = fermé`).
+- **Curseur de position (0–100 %)** → mappé directement sur `closePercent`,
+  qui utilise la même convention que Home Assistant (`0 = fermé`,
+  `100 = ouvert`), aucune conversion n'est nécessaire.
 - **Aérer** / **Position intermédiaire** → services
   `rollershutter_api.airing` et `rollershutter_api.intermediate_position`,
   utilisables dans une automatisation :

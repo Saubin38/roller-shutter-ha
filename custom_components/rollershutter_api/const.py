@@ -17,7 +17,7 @@ DEFAULT_API_PATH = "/api/rhollershutter"
 # Header utilisé pour l'authentification par clé API.
 # A adapter ici si ton backend Spring attend un autre header
 # (ex: "Authorization" avec valeur "Bearer <clé>").
-API_KEY_HEADER = "api_key"
+API_KEY_HEADER = "X-API-KEY"
 
 # Timeout des requêtes HTTP vers l'API (secondes)
 REQUEST_TIMEOUT = 10
