@@ -69,6 +69,7 @@ class RollerShutterCoverEntity(CoordinatorEntity, CoverEntity):
         | CoverEntityFeature.STOP
         | CoverEntityFeature.SET_POSITION
     )
+    _attr_has_entity_name = True
 
     def __init__(
         self,
@@ -94,11 +95,11 @@ class RollerShutterCoverEntity(CoordinatorEntity, CoverEntity):
 
     @property
     def current_cover_position(self) -> int | None:
-        """L'API utilise déjà la convention HA : 0 = fermé, 100 = ouvert."""
+        """HA: 0 = fermé, 100 = ouvert. L'API: 0 = ouvert, 100 = fermé."""
         data = self._data
         if data is None or data.get("closePercent") is None:
             return None
-        return int(data["closePercent"])
+        return 100 - int(data["closePercent"])
 
     @property
     def is_closed(self) -> bool | None:
@@ -142,8 +143,9 @@ class RollerShutterCoverEntity(CoordinatorEntity, CoverEntity):
         await self.coordinator.async_request_refresh()
 
     async def async_set_cover_position(self, **kwargs: Any) -> None:
-        position = kwargs[ATTR_POSITION]
-        await self._client.async_set_close_percent(self._shutter_name, position)
+        ha_position = kwargs[ATTR_POSITION]
+        api_percent = 100 - ha_position
+        await self._client.async_set_close_percent(self._shutter_name, api_percent)
         await self.coordinator.async_request_refresh()
 
     async def async_airing(self) -> None:
