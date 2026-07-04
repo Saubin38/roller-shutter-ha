@@ -14,6 +14,7 @@ plus deux services personnalisés (aération, position intermédiaire).
 2. Colle l'URL de ce repo, catégorie **Intégration**, clique sur **Ajouter**
 3. Recherche "Roller Shutter API" dans HACS et installe-la
 4. Redémarre Home Assistant
+5. Top
 
 ## Installation manuelle
 
