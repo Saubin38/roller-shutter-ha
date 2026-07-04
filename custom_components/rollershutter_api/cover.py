@@ -105,7 +105,7 @@ class RollerShutterCoverEntity(CoordinatorEntity, CoverEntity):
         data = self._data
         if data is None or data.get("closePercent") is None:
             return None
-        return int(data["closePercent"]) <= 0
+        return int(data["closePercent"]) >= 100
 
     @property
     def is_closing(self) -> bool | None:
@@ -114,9 +114,8 @@ class RollerShutterCoverEntity(CoordinatorEntity, CoverEntity):
 
     @property
     def is_opening(self) -> bool | None:
-        # L'API ne distingue pas ouverture/fermeture en cours, seulement
-        # "action en cours". On ne peut donc pas différencier les deux ici.
-        return None
+        data = self._data
+        return bool(data.get("isActionInProgress")) if data else None
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
