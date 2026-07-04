@@ -114,8 +114,9 @@ class RollerShutterCoverEntity(CoordinatorEntity, CoverEntity):
 
     @property
     def is_opening(self) -> bool | None:
-        data = self._data
-        return bool(data.get("isActionInProgress")) if data else None
+        # L'API ne distingue pas ouverture/fermeture en cours, seulement
+        # "action en cours". On ne peut donc pas différencier les deux ici.
+        return None
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
