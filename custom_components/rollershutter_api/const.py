@@ -20,4 +20,4 @@ DEFAULT_API_PATH = "/api/rhollershutter"
 API_KEY_HEADER = "X-API-KEY"
 
 # Timeout des requêtes HTTP vers l'API (secondes)
-REQUEST_TIMEOUT = 40
+REQUEST_TIMEOUT = 60
